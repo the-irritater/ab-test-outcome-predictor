@@ -18,9 +18,8 @@ def md(text):
 def code(text):
     cells.append(nbf.v4.new_code_cell(text.strip()))
 
-# ============================================================
 # PART 1: TITLE & SETUP
-# ============================================================
+
 md("""
 # A/B Test Outcome Predictor
 ## Predict Experiment Winners Faster Using ML
@@ -88,9 +87,9 @@ print(f"Pandas: {pd.__version__}")
 print("Setup complete.")
 """)
 
-# ============================================================
+
 # PART 1: PROJECT FRAMING
-# ============================================================
+
 md("""
 ---
 ## Part 1  --  Project Framing
@@ -124,9 +123,8 @@ At each checkpoint (day 1, 3, 5, 7), we extract features from the partial data c
 | **Success: Time Saved** | 7-10 days per experiment vs traditional 14-day test |
 """)
 
-# ============================================================
 # PART 2: DATASET SIMULATION
-# ============================================================
+
 md("""
 ---
 ## Part 2  --  Dataset Simulation
@@ -191,9 +189,8 @@ simulator.save(df, labels, data_dir='../data')
 print("Data saved to ../data/")
 """)
 
-# ============================================================
 # PART 3: EDA
-# ============================================================
+
 md("""
 ---
 ## Part 3  --  Exploratory Data Analysis
@@ -416,9 +413,9 @@ md("""
 - High-traffic experiments are easier to predict early; low-traffic experiments need more days
 """)
 
-# ============================================================
+
 # PART 4: STATISTICAL BASELINE
-# ============================================================
+
 md("""
 ---
 ## Part 4  --  Traditional A/B Testing Baseline
@@ -487,9 +484,9 @@ md("""
 The z-test is *conservative by design*  --  it waits for strong evidence. But many experiments that ultimately show significance already have visible signals at day 3-5. The ML model can learn to recognize these patterns.
 """)
 
-# ============================================================
+
 # PART 5: FEATURE ENGINEERING
-# ============================================================
+
 md("""
 ---
 ## Part 5  --  Feature Engineering
@@ -568,9 +565,8 @@ md("""
 - Metadata features (one-hot encoded) show low correlation with conversion features  --  they provide complementary information
 """)
 
-# ============================================================
 # PART 6: MODELING
-# ============================================================
+
 md("""
 ---
 ## Part 6  --  ML Modeling
@@ -653,9 +649,8 @@ md("""
 - At day 7, the confusion matrix is nearly diagonal -- reliable enough for decision support
 """)
 
-# ============================================================
 # PART 7: EARLY PREDICTION FRAMEWORK
-# ============================================================
+
 md("""
 ---
 ## Part 7  --  Early Prediction Framework
@@ -743,9 +738,9 @@ md("""
 - The traditional z-test catches up eventually, but ML's advantage is *speed*  --  making the same quality prediction weeks earlier
 """)
 
-# ============================================================
+ 
 # PART 8: EXPLAINABILITY
-# ============================================================
+
 md("""
 ---
 ## Part 8  --  Model Explainability
@@ -839,9 +834,9 @@ The model does not make predictions based on "black box magic." It primarily loo
 These are the same signals a statistician would examine  --  the ML model just synthesizes them into a single prediction faster and more consistently than manual review.
 """)
 
-# ============================================================
+
 # PART 9: BUSINESS INTERPRETATION
-# ============================================================
+
 md("""
 ---
 ## Part 9  --  Business Interpretation
@@ -874,9 +869,8 @@ md("""
 > "Our ML model can identify 80% of experiment winners by day 5 instead of day 14, saving an average of 9 days per test. For our team running 50 experiments per quarter, this translates to running more experiments per cycle, faster iteration, and quicker time-to-market for winning features. The model is most reliable for experiments with clear positive or negative effects. Edge cases  --  small effects or inconclusive experiments  --  still benefit from full-duration testing."
 """)
 
-# ============================================================
 # PART 10: DELIVERABLES SUMMARY
-# ============================================================
+
 md("""
 ---
 ## Part 10  --  Project Deliverables
@@ -929,9 +923,9 @@ Time Saved: ~9 days per experiment
 ```
 """)
 
-# ============================================================
+
 # PART 11: EXPECTED RESULTS
-# ============================================================
+
 md("""
 ---
 ## Part 11  --  Results Summary
@@ -1080,9 +1074,8 @@ These results are based on simulated data with controlled effect sizes. In produ
 - Use as decision support, not a replacement for statistical rigor
 """)
 
-# ============================================================
 # PART 12: PROJECT STRUCTURE
-# ============================================================
+
 md("""
 ---
 ## Part 12  --  Project Structure & Tech Stack
@@ -1158,9 +1151,8 @@ This project demonstrates how **machine learning can accelerate A/B testing deci
 *Created by [Your Name] | [Your Title] | [GitHub](https://github.com/yourusername)*
 """)
 
-# ============================================================
 # WRITE NOTEBOOK
-# ============================================================
+
 nb.cells = cells
 
 output_path = '/Users/the_irritater/Projects/ab-test-outcome-predictor/notebooks/AB_Test_Outcome_Predictor.ipynb'
