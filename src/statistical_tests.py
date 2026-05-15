@@ -36,9 +36,19 @@ class StatisticalTester:
         p_c = x_control / n_control if n_control > 0 else 0
         p_t = x_treatment / n_treatment if n_treatment > 0 else 0
         
-        # Pooled proportion
-        p_pool = (x_control + x_treatment) / (n_control + n_treatment)
-        se_pool = np.sqrt(p_pool * (1 - p_pool) * (1/n_control + 1/n_treatment))
+        # Pooled proportion (guard against zero total visitors)
+        total_n = n_control + n_treatment
+        if total_n > 0:
+            p_pool = (x_control + x_treatment) / total_n
+        else:
+            p_pool = 0
+        
+        # Guard against division-by-zero in SE when either arm has zero visitors
+        # or when p_pool is exactly 0 or 1 (no variance)
+        if n_control > 0 and n_treatment > 0 and 0 < p_pool < 1:
+            se_pool = np.sqrt(p_pool * (1 - p_pool) * (1/n_control + 1/n_treatment))
+        else:
+            se_pool = 0
         
         if se_pool > 0:
             z_stat = (p_t - p_c) / se_pool

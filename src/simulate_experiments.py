@@ -64,9 +64,13 @@ class ExperimentSimulator:
         })
         
         # Generate true treatment effects
-        # 40% positive (0.5% to 5% absolute lift)
-        # 30% negative (-0.5% to -5% absolute lift)
-        # 30% null (0 effect)
+        # Distribution rationale: 40/30/30 split reflects realistic industry
+        # data where most experiments have some effect (positive or negative),
+        # but a meaningful fraction show no detectable change. This creates
+        # a moderately imbalanced classification target.
+        # - 40% positive (0.5% to 5% absolute lift)
+        # - 30% negative (-0.5% to -5% absolute lift)
+        # - 30% null (0 effect)
         effect_type = self.rng.choice(
             ['positive', 'negative', 'null'],
             self.n_experiments,
@@ -181,12 +185,23 @@ class ExperimentSimulator:
             x_c = row['conversions_control']
             x_t = row['conversions_treatment']
             
-            p_c = x_c / n_c
-            p_t = x_t / n_t
+            p_c = x_c / n_c if n_c > 0 else 0
+            p_t = x_t / n_t if n_t > 0 else 0
             
             # Pooled proportion z-test
-            p_pool = (x_c + x_t) / (n_c + n_t)
-            se = np.sqrt(p_pool * (1 - p_pool) * (1/n_c + 1/n_t))
+            # Guard against zero total visitors (shouldn't happen, but defensive)
+            total_n = n_c + n_t
+            if total_n > 0:
+                p_pool = (x_c + x_t) / total_n
+            else:
+                p_pool = 0
+            
+            # Guard against zero SE (happens when p_pool is 0 or 1,
+            # or when both arms have zero visitors)
+            if n_c > 0 and n_t > 0 and 0 < p_pool < 1:
+                se = np.sqrt(p_pool * (1 - p_pool) * (1/n_c + 1/n_t))
+            else:
+                se = 0
             
             if se > 0:
                 z = (p_t - p_c) / se

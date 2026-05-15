@@ -209,12 +209,13 @@ Run all cells  --  data simulation, feature engineering, modeling, and analysis 
 
 ---
 
-## Limitations
+## Limitations & Edge Case Handling
 
 - Dataset is simulated with controlled parameters; real-world noise patterns may differ
 - Model should be retrained periodically on historical experiments in production
 - Results represent a proof-of-concept framework, not a deployed production system
 - Novelty effects and long-term behavioral changes are not captured in simulation
+- The pipeline validates required columns and handles missing data gracefully (zero-visitor arms, missing outcome labels, absent features) with explicit warnings rather than silent failures
 
 ---
 

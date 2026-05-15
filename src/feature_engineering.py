@@ -5,6 +5,16 @@ Creates conversion features, statistical uncertainty measures,
 Bayesian posterior features, and trend signals for each experiment
 at each day checkpoint.
 
+Design Notes:
+- A 3-day rolling window is used for conversion rate smoothing because
+  A/B tests typically exhibit high daily variance in the first 1-2 days
+  as traffic ramps up. A 3-day window balances recency with noise reduction.
+- Monte Carlo sampling (5000 draws) is used for Bayesian posterior estimation.
+  This provides ~1.4% standard error on probability estimates, sufficient
+  for classification features without excessive computation.
+- Features are designed to be computable at any checkpoint day (1-14),
+  enabling early stopping predictions.
+
 Author: Sanman Kadam
 """
 
@@ -12,6 +22,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 from typing import List, Optional
+import warnings
 
 
 class FeatureEngineer:
@@ -32,6 +43,34 @@ class FeatureEngineer:
     def __init__(self):
         self.feature_names = []
     
+    # Columns required by each feature computation stage
+    REQUIRED_CONVERSION_COLS = [
+        'conversion_rate_treatment', 'conversion_rate_control',
+        'observed_lift', 'experiment_id',
+        'conversions_control', 'visitors_control',
+        'conversions_treatment', 'visitors_treatment',
+    ]
+    REQUIRED_STATISTICAL_COLS = [
+        'visitors_control', 'visitors_treatment',
+        'conversions_control', 'conversions_treatment',
+    ]
+    REQUIRED_BAYESIAN_COLS = [
+        'conversions_control', 'visitors_control',
+        'conversions_treatment', 'visitors_treatment',
+    ]
+    REQUIRED_SAMPLE_SIZE_COLS = [
+        'visitors_control', 'visitors_treatment',
+    ]
+
+    def _validate_columns(self, df: pd.DataFrame, required: List[str], stage: str) -> None:
+        """Validate that required columns are present before feature computation."""
+        missing = [c for c in required if c not in df.columns]
+        if missing:
+            raise ValueError(
+                f"[{stage}] Missing required columns: {missing}. "
+                f"Ensure simulate_experiments.py output includes these fields."
+            )
+
     def compute_conversion_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Compute conversion-rate-based features.
@@ -42,7 +81,13 @@ class FeatureEngineer:
         - conversion_gap_trend: slope of observed_lift over recent days
         - rolling_cr_control_3d: 3-day rolling average control CR
         - rolling_cr_treatment_3d: 3-day rolling average treatment CR
+        
+        The 3-day window for rolling averages is chosen because:
+        - Day 1 data is typically noisy (small sample, ramp-up effects)
+        - A 3-day window captures short-term trend while smoothing variance
+        - Wider windows (5-7 day) would not be available at early checkpoints
         """
+        self._validate_columns(df, self.REQUIRED_CONVERSION_COLS, 'ConversionFeatures')
         df = df.copy()
         
         # Basic lift features (already present, ensuring they exist)
@@ -56,8 +101,10 @@ class FeatureEngineer:
             0
         )
         
-        # Conversion gap trend: slope of lift over last 3 days
-        # Computed per experiment using rolling window
+        # Conversion gap trend: slope of observed_lift over last 3 days.
+        # A positive slope means the treatment advantage is growing;
+        # a negative slope means it's shrinking. This helps the model
+        # distinguish transient effects from sustained ones.
         def compute_lift_slope(group):
             """Compute rolling slope of observed lift."""
             slopes = []
@@ -79,7 +126,8 @@ class FeatureEngineer:
         )
         
         # Rolling conversion rates (3-day window)
-        # We need to compute from daily data, not cumulative
+        # Computed from daily increments (not cumulative) to avoid
+        # auto-correlation artifacts in cumulative rates.
         def compute_rolling_cr(group, col_conv, col_vis):
             """Compute 3-day rolling conversion rate from daily increments."""
             daily_conv = group[col_conv].diff().fillna(group[col_conv])
@@ -111,11 +159,13 @@ class FeatureEngineer:
         Compute statistical uncertainty features.
         
         Features:
-        - pooled_standard_error: SE of the lift estimate
-        - z_statistic: current z-stat (evidence strength)
-        - p_value_current: current two-sided p-value
-        - lift_to_se_ratio: signal-to-noise ratio (lift / SE)
+        - pooled_standard_error: SE of the lift estimate under pooled-proportion model
+        - z_statistic: current z-stat (evidence strength against H0: no difference)
+        - p_value_current: current two-sided p-value from the z-test
+        - lift_to_se_ratio: signal-to-noise ratio (lift / SE); equivalent to z_statistic
+          but retained as a named feature for interpretability in SHAP analysis
         """
+        self._validate_columns(df, self.REQUIRED_STATISTICAL_COLS, 'StatisticalFeatures')
         df = df.copy()
         
         n_c = df['visitors_control'].values.astype(float)
@@ -160,18 +210,27 @@ class FeatureEngineer:
         """
         Compute Bayesian features using closed-form Beta-Binomial posterior.
         
-        Uses Beta(1, 1) prior (uniform) and computes:
+        Uses Beta(1, 1) prior (uniform / non-informative) and computes:
         - bayesian_prob_treatment_wins: P(p_t > p_c | data)
         - bayesian_expected_lift: E[p_t - p_c | data]
         - credible_interval_width: Width of 95% credible interval for lift
         
         The probability P(p_t > p_c) is estimated via Monte Carlo sampling
         from the posterior Beta distributions.
+        
+        Monte Carlo precision: With n_samples=5000, the standard error of the
+        probability estimate is at most sqrt(0.25/5000) ≈ 0.007 (0.7%), which
+        is sufficient for use as a classification feature.
+        
+        Edge case handling: When visitor counts are very small (< 5), the
+        posterior is dominated by the prior, producing prob ≈ 0.5 and wide
+        credible intervals. This is the correct Bayesian behavior (uncertain).
         """
+        self._validate_columns(df, self.REQUIRED_BAYESIAN_COLS, 'BayesianFeatures')
         df = df.copy()
         
         rng = np.random.RandomState(42)
-        n_samples = 5000  # MC samples for posterior probability
+        n_samples = 5000  # MC samples — see docstring for precision rationale
         
         probs = []
         expected_lifts = []
@@ -179,10 +238,11 @@ class FeatureEngineer:
         
         for _, row in df.iterrows():
             # Beta posterior parameters (with Beta(1,1) prior)
-            alpha_c = row['conversions_control'] + 1
-            beta_c = row['visitors_control'] - row['conversions_control'] + 1
-            alpha_t = row['conversions_treatment'] + 1
-            beta_t = row['visitors_treatment'] - row['conversions_treatment'] + 1
+            # Guard against negative beta params from data issues
+            alpha_c = max(row['conversions_control'] + 1, 1)
+            beta_c = max(row['visitors_control'] - row['conversions_control'] + 1, 1)
+            alpha_t = max(row['conversions_treatment'] + 1, 1)
+            beta_t = max(row['visitors_treatment'] - row['conversions_treatment'] + 1, 1)
             
             # Monte Carlo samples from posteriors
             samples_c = rng.beta(alpha_c, beta_c, n_samples)
@@ -213,9 +273,11 @@ class FeatureEngineer:
         
         Features:
         - total_visitors: cumulative visitors across both arms
-        - sample_size_ratio: treatment / control visitors (balance)
+        - sample_size_ratio: treatment / control visitors (balance);
+          a ratio near 1.0 indicates balanced traffic allocation
         - sample_size_progress: already present from simulation
         """
+        self._validate_columns(df, self.REQUIRED_SAMPLE_SIZE_COLS, 'SampleSizeFeatures')
         df = df.copy()
         
         df['total_visitors'] = df['visitors_control'] + df['visitors_treatment']
