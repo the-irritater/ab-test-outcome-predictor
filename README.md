@@ -7,20 +7,20 @@
 [![Experimentation](https://img.shields.io/badge/Domain-A%2FB%20Testing-success.svg)]()
 [![SHAP](https://img.shields.io/badge/Explainability-SHAP-blueviolet.svg)]()
 
----
+-
 
 ## Abstract
 
 Companies running dozens of A/B experiments simultaneously waste significant time waiting 2-4 weeks per test for statistical significance. This project demonstrates how machine learning can predict experiment outcomes at **day 5** with **91% accuracy**, reducing time-to-decision by **64%** compared to traditional significance testing.
 
-The system simulates 1,200 realistic A/B experiments, engineers 20+ statistical and Bayesian features from partial data, and trains classification models to predict whether the treatment will win, lose, or be inconclusive  --  days before a classical z-test would reach significance.
+The system simulates 1,200 realistic A/B experiments, engineers 20+ statistical and Bayesian features from partial data, and trains classification models to predict whether the treatment will win, lose, or be inconclusive  -  days before a classical z-test would reach significance.
 
----
+-
 
 ## Key Results
 
 | Checkpoint | ML Accuracy | ML F1 Score | Z-Test Resolved | Days Saved |
-|---|---|---|---|---|
+|-|-|-|-|-|
 | Day 1 | 74.3% | 0.735 | ~8% | 13 days |
 | Day 3 | 87.4% | 0.870 | ~28% | 11 days |
 | **Day 5** | **90.7%** | **0.905** | ~42% | **9 days** |
@@ -28,7 +28,7 @@ The system simulates 1,200 realistic A/B experiments, engineers 20+ statistical 
 
 > For a team running 50 experiments per quarter, predicting winners at day 5 saves **~450 experiment-days per quarter**.
 
----
+-
 
 ## Business Problem
 
@@ -36,7 +36,7 @@ A/B testing is the gold standard for product decisions. But classical hypothesis
 
 **This project asks:** Can ML predict the final experiment outcome using only partial data (days 1-7), without sacrificing decision quality?
 
----
+-
 
 ## Methodology
 
@@ -72,14 +72,14 @@ A/B testing is the gold standard for product decisions. But classical hypothesis
 4. **Compare** ML predictions at days 1, 3, 5, 7 against the traditional z-test resolution rate
 5. **Explain** predictions using SHAP values and feature importance
 
----
+-
 
 ## Dataset Design
 
 Each of the 1,200 simulated experiments includes:
 
 | Feature | Description |
-|---|---|
+|-|-|
 | `experiment_id` | Unique experiment identifier |
 | `day_number` | Day 1-14 (daily snapshots) |
 | `visitors_control/treatment` | Cumulative visitors per arm |
@@ -91,24 +91,24 @@ Each of the 1,200 simulated experiments includes:
 | `baseline_conversion_rate` | Pre-experiment baseline |
 | `sample_size_progress` | % of expected traffic collected |
 
-**Target variable:** `final_outcome`  --  determined by a two-proportion z-test on full day-14 data:
+**Target variable:** `final_outcome`  -  determined by a two-proportion z-test on full day-14 data:
 - `treatment_wins` (p < 0.05, positive lift)
 - `control_wins` (p < 0.05, negative lift)
 - `inconclusive` (p >= 0.05)
 
----
+-
 
 ## Engineered Features
 
 | Category | Features | Purpose |
-|---|---|---|
+|-|-|-|
 | Conversion | cumulative_lift, relative_uplift, gap_trend, rolling CRs | Direct treatment signal |
 | Statistical | z_statistic, p_value, SE, lift/SE ratio | Evidence strength |
 | Bayesian | P(treatment wins), expected lift, CI width | Probabilistic assessment |
 | Sample Size | total_visitors, progress, balance ratio | Data sufficiency |
 | Metadata | device, region, traffic source, category (one-hot) | Experiment context |
 
----
+-
 
 ## Model Comparison
 
@@ -128,20 +128,20 @@ Each of the 1,200 simulated experiments includes:
 
 ![Dashboard](visuals/results_dashboard.png)
 
----
+-
 
 ## Feature Importance
 
 ![Feature Importance](visuals/feature_importance_day5.png)
 
 **Top predictors at Day 5:**
-1. `z_statistic`  --  statistical evidence strength
-2. `bayesian_prob_treatment_wins`  --  Bayesian probability of treatment winning
-3. `lift_to_se_ratio`  --  signal-to-noise ratio
-4. `cumulative_lift`  --  raw conversion rate difference
-5. `sample_size_progress`  --  data collection completeness
+1. `z_statistic`  -  statistical evidence strength
+2. `bayesian_prob_treatment_wins`  -  Bayesian probability of treatment winning
+3. `lift_to_se_ratio`  -  signal-to-noise ratio
+4. `cumulative_lift`  -  raw conversion rate difference
+5. `sample_size_progress`  -  data collection completeness
 
----
+-
 
 ## Data Leakage Prevention
 
@@ -149,38 +149,38 @@ Each of the 1,200 simulated experiments includes:
 
 Each experiment has 14 daily rows. Random row-level splitting would leak future information about the same experiment into training. All 14 rows for a given experiment stay in the same split (train or test).
 
----
+-
 
 ## Repository Structure
 
 ```
 ab-test-outcome-predictor/
-|-- README.md
-|-- requirements.txt
-|-- .gitignore
-|-- data/
-|   |-- simulated_experiments.csv          # 16,800 rows (generated)
-|   +-- experiment_labels.csv             # 1,200 labels
-|-- notebooks/
-|   +-- AB_Test_Outcome_Predictor.ipynb   # Complete analysis (12 parts)
-|-- src/
-|   |-- __init__.py
-|   |-- simulate_experiments.py           # Experiment simulation engine
-|   |-- statistical_tests.py              # Z-tests and benchmarking
-|   |-- feature_engineering.py            # Feature engineering pipeline
-|   |-- models.py                         # ML training and evaluation
-|   +-- explainability.py                 # SHAP and feature importance
-|-- visuals/                              # All generated plots
-+-- scripts/
-    +-- create_notebook.py                # Notebook generator
+|- README.md
+|- requirements.txt
+|- .gitignore
+|- data/
+|   |- simulated_experiments.csv          # 16,800 rows (generated)
+|   +- experiment_labels.csv             # 1,200 labels
+|- notebooks/
+|   +- AB_Test_Outcome_Predictor.ipynb   # Complete analysis (12 parts)
+|- src/
+|   |- __init__.py
+|   |- simulate_experiments.py           # Experiment simulation engine
+|   |- statistical_tests.py              # Z-tests and benchmarking
+|   |- feature_engineering.py            # Feature engineering pipeline
+|   |- models.py                         # ML training and evaluation
+|   +- explainability.py                 # SHAP and feature importance
+|- visuals/                              # All generated plots
++- scripts/
+    +- create_notebook.py                # Notebook generator
 ```
 
----
+-
 
 ## Tech Stack
 
 | Tool | Purpose |
-|---|---|
+|-|-|
 | Python 3.11 | Core language |
 | NumPy, pandas | Data manipulation |
 | SciPy | Statistical testing, Bayesian posteriors |
@@ -189,7 +189,7 @@ ab-test-outcome-predictor/
 | SHAP | Model explainability |
 | Matplotlib, seaborn | Visualization |
 
----
+-
 
 ## Quick Start
 
@@ -205,9 +205,9 @@ pip install -r requirements.txt
 jupyter notebook notebooks/AB_Test_Outcome_Predictor.ipynb
 ```
 
-Run all cells  --  data simulation, feature engineering, modeling, and analysis execute inline.
+Run all cells  -  data simulation, feature engineering, modeling, and analysis execute inline.
 
----
+-
 
 ## Limitations & Edge Case Handling
 
@@ -217,7 +217,7 @@ Run all cells  --  data simulation, feature engineering, modeling, and analysis 
 - Novelty effects and long-term behavioral changes are not captured in simulation
 - The pipeline validates required columns and handles missing data gracefully (zero-visitor arms, missing outcome labels, absent features) with explicit warnings rather than silent failures
 
----
+-
 
 ## Conclusion
 
@@ -233,7 +233,31 @@ This project demonstrates that ML can reliably predict A/B test outcomes 9 days 
 - Edge cases with very small expected effects
 - Regulatory or compliance requirements
 
----
+-
+
+## Project Structure
+
+```text
+ab-test-outcome-predictor/
+├── src/
+│   ├── __init__.py
+│   ├── explainability.py
+│   ├── feature_engineering.py
+│   ├── models.py
+│   ├── simulate_experiments.py
+│   └── statistical_tests.py
+├── notebooks/
+│   └── AB_Test_Outcome_Predictor.ipynb
+├── data/
+├── reports/
+├── scripts/
+├── visuals/
+├── assets/
+├── requirements.txt
+└── README.md
+```
+
+-
 
 ## Author
 
@@ -245,6 +269,6 @@ Aspiring Data Analyst
 - LinkedIn: [Sanman Kadam](https://www.linkedin.com/in/sanman-kadam-7a4990374/)
 - LinkedIn: [Rutuja Shinde](https://www.linkedin.com/in/rutuja-shinde-bb83b0215/)
 
----
+-
 
 *Built as a portfolio project demonstrating applied experimentation, statistical reasoning, and machine learning for product analytics.*

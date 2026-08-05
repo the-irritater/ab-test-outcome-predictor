@@ -1,5 +1,5 @@
 """
-Model Explainability  --  SHAP values, feature importance, and interpretability.
+Model Explainability  -  SHAP values, feature importance, and interpretability.
 
 Provides recruiter-friendly explanations of model predictions using
 SHAP TreeExplainer for XGBoost and feature importance analysis.
@@ -124,7 +124,7 @@ class ModelExplainer:
                     self.shap_values[i], X,
                     show=False, max_display=15
                 )
-                plt.title(f'SHAP Summary  --  Class: {class_name}',
+                plt.title(f'SHAP Summary  -  Class: {class_name}',
                          fontsize=14, fontweight='bold')
                 plt.tight_layout()
                 if save_path:
@@ -237,7 +237,7 @@ class ModelExplainer:
             "Bayesian probability) rather than raw conversion numbers. This makes sense because:",
             "",
             "1. A large z-statistic at day 5 is a strong signal that the final result will "
-            "be significant  --  the evidence is already accumulating.",
+            "be significant  -  the evidence is already accumulating.",
             "2. The Bayesian probability provides a direct estimate of the chance that "
             "treatment outperforms control, accounting for uncertainty.",
             "3. The signal-to-noise ratio captures whether the observed lift is large "

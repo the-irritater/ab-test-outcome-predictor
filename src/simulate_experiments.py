@@ -1,5 +1,5 @@
 """
-Experiment Simulator  --  Generates realistic A/B test datasets.
+Experiment Simulator  -  Generates realistic A/B test datasets.
 
 Simulates 1,200 experiments, each running 14 days, with controlled
 distributions of true treatment effects (positive, negative, null).

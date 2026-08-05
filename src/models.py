@@ -1,5 +1,5 @@
 """
-Model Trainer  --  Trains and evaluates ML models for A/B test outcome prediction.
+Model Trainer  -  Trains and evaluates ML models for A/B test outcome prediction.
 
 Implements Logistic Regression (baseline), Random Forest, and XGBoost
 with experiment-level train-test splitting to prevent data leakage.
@@ -321,7 +321,7 @@ class ModelTrainer:
         models_dict = self.get_models()
         
         for day in checkpoints:
-            print(f"--- Checkpoint Day {day} ---")
+            print(f"- Checkpoint Day {day} -")
             
             X_train, y_train, X_test, y_test = self.prepare_checkpoint_data(
                 df, day, feature_cols, target_col, train_ids_full, test_ids
@@ -479,7 +479,7 @@ class ModelTrainer:
             axes[idx].set_xlabel('Predicted', fontsize=11)
             axes[idx].set_ylabel('Actual', fontsize=11)
             axes[idx].set_title(
-                f'{model_name}  --  Day {result["checkpoint_day"]}\n'
+                f'{model_name}  -  Day {result["checkpoint_day"]}\n'
                 f'Accuracy: {result["accuracy"]:.1%}',
                 fontsize=12, fontweight='bold'
             )

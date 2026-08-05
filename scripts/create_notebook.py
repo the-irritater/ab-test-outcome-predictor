@@ -25,12 +25,12 @@ md("""
 ## Predict Experiment Winners Faster Using ML
 
 | Metadata | Description |
-| :--- | :--- |
+| :- | :- |
 | **Authors** | Sanman Kadam, Rutuja |
 | **Date** | April 2026 |
 | **Objective** | Build an ML system that predicts A/B test outcomes using partial experiment data, reducing time-to-decision by 50-64% compared to traditional statistical significance testing. |
 
----
+-
 
 ### Project Summary
 
@@ -45,7 +45,7 @@ This project:
 
 ### Business Value
 
-For a team running 50 experiments per quarter, predicting winners at day 5 instead of day 14 saves **450 experiment-days per quarter**  --  enabling faster iteration and more experiments per cycle.
+For a team running 50 experiments per quarter, predicting winners at day 5 instead of day 14 saves **450 experiment-days per quarter**  -  enabling faster iteration and more experiments per cycle.
 """)
 
 code("""
@@ -91,8 +91,8 @@ print("Setup complete.")
 # PART 1: PROJECT FRAMING
 
 md("""
----
-## Part 1  --  Project Framing
+-
+## Part 1  -  Project Framing
 
 ### Business Problem
 
@@ -108,14 +108,14 @@ Consider a product team that runs 50 experiments per quarter:
 ### What "Predicting Winners Early" Means
 
 At each checkpoint (day 1, 3, 5, 7), we extract features from the partial data collected so far and use an ML model to predict the final outcome:
-- **treatment_wins**  --  the treatment variant significantly outperforms control
-- **control_wins**  --  the control is significantly better
-- **inconclusive**  --  no statistically significant difference
+- **treatment_wins**  -  the treatment variant significantly outperforms control
+- **control_wins**  -  the control is significantly better
+- **inconclusive**  -  no statistically significant difference
 
 ### Assumptions & Success Criteria
 
 | Item | Value |
-|---|---|
+|-|-|
 | **Target Variable** | `final_outcome` (3-class: treatment_wins, control_wins, inconclusive) |
 | **Inputs** | Features from partial experiment data at day N |
 | **Success: Accuracy** | >= 80% at day 5, >= 85% at day 7 |
@@ -126,8 +126,8 @@ At each checkpoint (day 1, 3, 5, 7), we extract features from the partial data c
 # PART 2: DATASET SIMULATION
 
 md("""
----
-## Part 2  --  Dataset Simulation
+-
+## Part 2  -  Dataset Simulation
 
 ### Simulation Design
 
@@ -140,7 +140,7 @@ We simulate **1,200 A/B experiments**, each running for **14 days**. For each ex
 - Daily visitors per arm: U(200, 2000)
 - Conversions are drawn from **Binomial distributions**
 
-This mix is realistic  --  in practice, most experiments fail or show null results.
+This mix is realistic  -  in practice, most experiments fail or show null results.
 """)
 
 code("""
@@ -178,7 +178,7 @@ md("""
 **Interpretation:**
 - The dataset contains 16,800 rows (1,200 experiments × 14 days)
 - The outcome distribution shows a realistic mix: ~40% treatment wins, ~30% control wins, ~30% inconclusive
-- Note that not all positive-effect experiments result in "treatment_wins"  --  some may not reach significance by day 14 if the effect is small or variance is high
+- Note that not all positive-effect experiments result in "treatment_wins"  -  some may not reach significance by day 14 if the effect is small or variance is high
 - Similarly, some null-effect experiments may show spurious significance (Type I errors, expected at ~5%)
 """)
 
@@ -192,8 +192,8 @@ print("Data saved to ../data/")
 # PART 3: EDA
 
 md("""
----
-## Part 3  --  Exploratory Data Analysis
+-
+## Part 3  -  Exploratory Data Analysis
 
 ### 3.1 Distribution of True Treatment Effects
 """)
@@ -214,7 +214,7 @@ for effect_type in ['positive', 'negative', 'null']:
     ax.hist(subset['true_treatment_effect'] * 100, bins=25, alpha=0.7,
             label=f"{effect_type} ({len(subset)})", color=colors[effect_type],
             edgecolor='white')
-ax.axvline(0, color='black', linestyle='--', linewidth=1, alpha=0.7)
+ax.axvline(0, color='black', linestyle='-', linewidth=1, alpha=0.7)
 ax.set_xlabel('True Treatment Effect (percentage points)')
 ax.set_ylabel('Count')
 ax.set_title('Distribution of True Treatment Effects', fontweight='bold')
@@ -240,13 +240,13 @@ md("""
 **Interpretation:**
 - The true treatment effects span from -5% to +5% in absolute terms
 - Null experiments (zero effect) appear as a spike at zero
-- The final outcomes do NOT perfectly mirror the effect types  --  some positive effects are too small to reach significance, and some null effects produce spurious significance (as expected)
+- The final outcomes do NOT perfectly mirror the effect types  -  some positive effects are too small to reach significance, and some null effects produce spurious significance (as expected)
 - This realistic noise is exactly what makes the prediction task challenging and interesting
 """)
 
 code("""
 # ============================================================
-# 3.2 Observed Lift Over Time  --  Panel of 6 Experiments
+# 3.2 Observed Lift Over Time  -  Panel of 6 Experiments
 # ============================================================
 # Select 2 from each outcome type for illustration
 sample_ids = []
@@ -267,7 +267,7 @@ for idx, exp_id in enumerate(sample_ids):
     
     ax.plot(exp_data['day_number'], exp_data['observed_lift'] * 100,
             marker='o', linewidth=2, color=outcome_colors[outcome], markersize=5)
-    ax.axhline(0, color='gray', linestyle='--', alpha=0.5)
+    ax.axhline(0, color='gray', linestyle='-', alpha=0.5)
     ax.axhline(true_effect * 100, color='black', linestyle=':', alpha=0.5, label=f'True: {true_effect*100:.2f}pp')
     ax.fill_between(exp_data['day_number'], 0, exp_data['observed_lift'] * 100,
                      alpha=0.1, color=outcome_colors[outcome])
@@ -286,11 +286,11 @@ plt.show()
 
 md("""
 **Interpretation:**
-- Early days (1-3) show **high volatility**  --  the observed lift bounces around significantly
+- Early days (1-3) show **high volatility**  -  the observed lift bounces around significantly
 - By days 7-10, the lift **stabilizes** closer to the true effect (black dotted line)
 - This pattern is the core insight: **early data is noisy, but contains signal**
 - The ML model's job is to extract that signal despite the noise
-- Notice how some "inconclusive" experiments show non-zero lift  --  the effect exists but isn't large enough to be statistically significant
+- Notice how some "inconclusive" experiments show non-zero lift  -  the effect exists but isn't large enough to be statistically significant
 """)
 
 code("""
@@ -351,7 +351,7 @@ for ax, day in zip(axes, [3, 5]):
     ax.set_xticklabels(order, fontsize=10)
     ax.set_ylabel('Observed Lift (percentage points)')
     ax.set_title(f'Observed Lift at Day {day} by Final Outcome', fontweight='bold')
-    ax.axhline(0, color='gray', linestyle='--', alpha=0.5)
+    ax.axhline(0, color='gray', linestyle='-', alpha=0.5)
     ax.grid(True, alpha=0.3)
 
 plt.tight_layout()
@@ -361,10 +361,10 @@ plt.show()
 
 md("""
 **Interpretation:**
-- Even at day 3, the **distributions are partially separated**  --  treatment winners tend to show positive early lift and control winners show negative lift
+- Even at day 3, the **distributions are partially separated**  -  treatment winners tend to show positive early lift and control winners show negative lift
 - However, there is significant **overlap**, especially between "inconclusive" and the other classes
-- By day 5, the separation improves  --  this is why ML accuracy jumps between day 3 and day 5
-- The overlap explains why the model can never reach 100% accuracy early  --  some experiments genuinely need more data
+- By day 5, the separation improves  -  this is why ML accuracy jumps between day 3 and day 5
+- The overlap explains why the model can never reach 100% accuracy early  -  some experiments genuinely need more data
 """)
 
 code("""
@@ -394,7 +394,7 @@ ax.grid(True, alpha=0.3)
 z = np.polyfit(lift_var['avg_daily_visitors'], lift_var['lift_std'] * 100, 1)
 p = np.poly1d(z)
 x_line = np.linspace(lift_var['avg_daily_visitors'].min(), lift_var['avg_daily_visitors'].max(), 100)
-ax.plot(x_line, p(x_line), 'r--', linewidth=2, alpha=0.7, label='Trend')
+ax.plot(x_line, p(x_line), 'r-', linewidth=2, alpha=0.7, label='Trend')
 ax.legend()
 
 plt.tight_layout()
@@ -407,7 +407,7 @@ print(f"Correlation between traffic volume and lift volatility: {corr:.3f}")
 
 md("""
 **Interpretation:**
-- Experiments with more daily visitors show **lower lift volatility**  --  their estimates stabilize faster
+- Experiments with more daily visitors show **lower lift volatility**  -  their estimates stabilize faster
 - This is a fundamental statistical property: larger samples reduce variance
 - The model uses `sample_size_progress` and `total_visitors` to capture this effect
 - High-traffic experiments are easier to predict early; low-traffic experiments need more days
@@ -417,8 +417,8 @@ md("""
 # PART 4: STATISTICAL BASELINE
 
 md("""
----
-## Part 4  --  Traditional A/B Testing Baseline
+-
+## Part 4  -  Traditional A/B Testing Baseline
 
 ### How Traditional Testing Works
 
@@ -434,7 +434,7 @@ The key limitation: **you must wait until p < 0.05**, which may take the full ex
 
 code("""
 # ============================================================
-# Part 4: Statistical Baseline  --  Time to Significance
+# Part 4: Statistical Baseline  -  Time to Significance
 # ============================================================
 from statistical_tests import StatisticalTester
 
@@ -476,27 +476,27 @@ md("""
 **Interpretation:**
 - The traditional z-test resolves only a **small fraction** of experiments early (days 1-3)
 - By day 7, roughly **half** of experiments have reached significance
-- Even by day 14, many experiments remain **inconclusive**  --  this is expected because 30% of experiments have no true effect
+- Even by day 14, many experiments remain **inconclusive**  -  this is expected because 30% of experiments have no true effect
 - **This is the benchmark:** Can ML predict the final outcome for more experiments, earlier?
 
 ### Key Insight
 
-The z-test is *conservative by design*  --  it waits for strong evidence. But many experiments that ultimately show significance already have visible signals at day 3-5. The ML model can learn to recognize these patterns.
+The z-test is *conservative by design*  -  it waits for strong evidence. But many experiments that ultimately show significance already have visible signals at day 3-5. The ML model can learn to recognize these patterns.
 """)
 
 
 # PART 5: FEATURE ENGINEERING
 
 md("""
----
-## Part 5  --  Feature Engineering
+-
+## Part 5  -  Feature Engineering
 
 ### Feature Categories
 
 We engineer features from five categories:
 
 | Category | Features | Why Important |
-|---|---|---|
+|-|-|-|
 | **Conversion** | cumulative_lift, relative_uplift, gap_trend, rolling CRs | Direct signal about treatment performance |
 | **Statistical** | z_statistic, p_value, SE, lift/SE ratio | Measures evidence strength and uncertainty |
 | **Sample Size** | total_visitors, progress, balance ratio | How much data we have to work with |
@@ -558,23 +558,23 @@ plt.show()
 
 md("""
 **Interpretation:**
-- `z_statistic` and `lift_to_se_ratio` are perfectly correlated (they are mathematically equivalent)  --  we could drop one, but tree models handle this automatically
-- `bayesian_prob_treatment_wins` correlates strongly with `z_statistic`  --  both measure evidence strength, but from different frameworks
-- `cumulative_lift` and statistical features cluster together  --  expected since they all derive from conversion data
-- `sample_size_progress` and `total_visitors` are related but not redundant  --  progress is normalized
-- Metadata features (one-hot encoded) show low correlation with conversion features  --  they provide complementary information
+- `z_statistic` and `lift_to_se_ratio` are perfectly correlated (they are mathematically equivalent)  -  we could drop one, but tree models handle this automatically
+- `bayesian_prob_treatment_wins` correlates strongly with `z_statistic`  -  both measure evidence strength, but from different frameworks
+- `cumulative_lift` and statistical features cluster together  -  expected since they all derive from conversion data
+- `sample_size_progress` and `total_visitors` are related but not redundant  -  progress is normalized
+- Metadata features (one-hot encoded) show low correlation with conversion features  -  they provide complementary information
 """)
 
 # PART 6: MODELING
 
 md("""
----
-## Part 6  --  ML Modeling
+-
+## Part 6  -  ML Modeling
 
 ### Model Selection
 
 | Model | Role | Rationale |
-|---|---|---|
+|-|-|-|
 | **Logistic Regression** | Baseline | Simple, interpretable, establishes performance floor |
 | **Random Forest** | Intermediate | Captures non-linear interactions, provides feature importance |
 | **XGBoost** | Best model | State-of-the-art for tabular data, strong regularization |
@@ -583,7 +583,7 @@ md("""
 
 **Critical: Split by experiment_id, not by rows.**
 
-Each experiment has 14 rows (one per day). If we split randomly, a model could see day-7 data from experiment #42 in training and then predict day-5 for the same experiment in testing -- that is **data leakage**. Instead, we assign entire experiments to train or test.
+Each experiment has 14 rows (one per day). If we split randomly, a model could see day-7 data from experiment #42 in training and then predict day-5 for the same experiment in testing - that is **data leakage**. Instead, we assign entire experiments to train or test.
 
 - **Train:** 70% of experiments (840)
 - **Validation:** 15% of experiments (180)
@@ -620,12 +620,12 @@ trainer.plot_accuracy_comparison(summary, save_path='../visuals/model_comparison
 
 md("""
 **Interpretation:**
-- **Day 1:** All models perform near random (~50-55%)  --  too little data for reliable predictions
-- **Day 3:** Performance jumps to ~70%  --  early patterns are emerging
-- **Day 5:** XGBoost reaches ~80%+ accuracy  --  this is the sweet spot for early prediction
-- **Day 7:** XGBoost approaches ~88%  --  very reliable predictions
+- **Day 1:** All models perform near random (~50-55%)  -  too little data for reliable predictions
+- **Day 3:** Performance jumps to ~70%  -  early patterns are emerging
+- **Day 5:** XGBoost reaches ~80%+ accuracy  -  this is the sweet spot for early prediction
+- **Day 7:** XGBoost approaches ~88%  -  very reliable predictions
 - XGBoost consistently outperforms Logistic Regression and Random Forest, especially at early days
-- The accuracy gap between models narrows at day 7  --  when signals are strong, even simple models perform well
+- The accuracy gap between models narrows at day 7  -  when signals are strong, even simple models perform well
 """)
 
 code("""
@@ -642,18 +642,18 @@ trainer.plot_confusion_matrices(
 
 md("""
 **Interpretation:**
-- At day 1, the model confuses all three classes heavily  --  diagonal is weak
-- By day 5, the diagonal dominates  --  most predictions are correct
-- **Most common error:** `inconclusive` vs `treatment_wins` -- it is genuinely hard to distinguish a small positive effect from noise early on
-- **`control_wins` is easier to predict** -- large negative lifts are visible early
-- At day 7, the confusion matrix is nearly diagonal -- reliable enough for decision support
+- At day 1, the model confuses all three classes heavily  -  diagonal is weak
+- By day 5, the diagonal dominates  -  most predictions are correct
+- **Most common error:** `inconclusive` vs `treatment_wins` - it is genuinely hard to distinguish a small positive effect from noise early on
+- **`control_wins` is easier to predict** - large negative lifts are visible early
+- At day 7, the confusion matrix is nearly diagonal - reliable enough for decision support
 """)
 
 # PART 7: EARLY PREDICTION FRAMEWORK
 
 md("""
----
-## Part 7  --  Early Prediction Framework
+-
+## Part 7  -  Early Prediction Framework
 
 ### ML vs Traditional Testing: Time Savings Analysis
 
@@ -662,7 +662,7 @@ The core question: **How many days earlier can ML predict the outcome compared t
 
 code("""
 # ============================================================
-# Part 7: Early Prediction  --  Time Savings
+# Part 7: Early Prediction  -  Time Savings
 # ============================================================
 
 # Compare ML vs statistical baseline
@@ -735,21 +735,21 @@ md("""
 - This means the ML model provides actionable predictions **9 days earlier** than the full 14-day test  
 - At **day 7**, ML accuracy exceeds ~88%, giving high confidence in early predictions
 - **Time saved calculation:** For 50 experiments/quarter, saving 9 days each = **450 experiment-days saved**
-- The traditional z-test catches up eventually, but ML's advantage is *speed*  --  making the same quality prediction weeks earlier
+- The traditional z-test catches up eventually, but ML's advantage is *speed*  -  making the same quality prediction weeks earlier
 """)
 
  
 # PART 8: EXPLAINABILITY
 
 md("""
----
-## Part 8  --  Model Explainability
+-
+## Part 8  -  Model Explainability
 
 ### Why Explainability Matters
 
 For stakeholders to trust ML predictions, they need to understand *why* the model makes certain predictions. We use:
-1. **Feature importance**  --  which features the model relies on most
-2. **SHAP values**  --  how each feature impacts individual predictions
+1. **Feature importance**  -  which features the model relies on most
+2. **SHAP values**  -  how each feature impacts individual predictions
 """)
 
 code("""
@@ -831,31 +831,31 @@ The model does not make predictions based on "black box magic." It primarily loo
 2. **What does the Bayesian probability say?** (probability that treatment wins)
 3. **Is the observed improvement large relative to the noise?** (signal-to-noise ratio)
 
-These are the same signals a statistician would examine  --  the ML model just synthesizes them into a single prediction faster and more consistently than manual review.
+These are the same signals a statistician would examine  -  the ML model just synthesizes them into a single prediction faster and more consistently than manual review.
 """)
 
 
 # PART 9: BUSINESS INTERPRETATION
 
 md("""
----
-## Part 9  --  Business Interpretation
+-
+## Part 9  -  Business Interpretation
 
 ### When Should the Company Trust the ML Prediction?
 
 | Condition | Recommendation |
-|---|---|
-| ML confidence > 85% at day 5+ | **High trust**  --  consider stopping the experiment |
-| ML confidence 70-85% at day 5 | **Moderate trust**  --  flag for review, wait 2 more days |
-| ML confidence < 70% | **Low trust**  --  continue the experiment to full duration |
-| Sample size progress < 40% | **Always wait**  --  insufficient data regardless of ML prediction |
+|-|-|
+| ML confidence > 85% at day 5+ | **High trust**  -  consider stopping the experiment |
+| ML confidence 70-85% at day 5 | **Moderate trust**  -  flag for review, wait 2 more days |
+| ML confidence < 70% | **Low trust**  -  continue the experiment to full duration |
+| Sample size progress < 40% | **Always wait**  -  insufficient data regardless of ML prediction |
 
 ### Risks of Stopping Experiments Early
 
-1. **False positives**  --  declaring a winner when the effect isn't real (~5-10% risk at day 5)
-2. **Missing small effects**  --  effects that take longer to detect may be commercially meaningful
-3. **Novelty effects**  --  early treatment performance may not sustain long-term
-4. **Peeking bias**  --  repeatedly checking results increases false positive rates (if not using sequential testing)
+1. **False positives**  -  declaring a winner when the effect isn't real (~5-10% risk at day 5)
+2. **Missing small effects**  -  effects that take longer to detect may be commercially meaningful
+3. **Novelty effects**  -  early treatment performance may not sustain long-term
+4. **Peeking bias**  -  repeatedly checking results increases false positive rates (if not using sequential testing)
 
 ### When ML Should Support but Not Replace Statistics
 
@@ -866,14 +866,14 @@ md("""
 
 ### Presenting to Product Managers
 
-> "Our ML model can identify 80% of experiment winners by day 5 instead of day 14, saving an average of 9 days per test. For our team running 50 experiments per quarter, this translates to running more experiments per cycle, faster iteration, and quicker time-to-market for winning features. The model is most reliable for experiments with clear positive or negative effects. Edge cases  --  small effects or inconclusive experiments  --  still benefit from full-duration testing."
+> "Our ML model can identify 80% of experiment winners by day 5 instead of day 14, saving an average of 9 days per test. For our team running 50 experiments per quarter, this translates to running more experiments per cycle, faster iteration, and quicker time-to-market for winning features. The model is most reliable for experiments with clear positive or negative effects. Edge cases  -  small effects or inconclusive experiments  -  still benefit from full-duration testing."
 """)
 
 # PART 10: DELIVERABLES SUMMARY
 
 md("""
----
-## Part 10  --  Project Deliverables
+-
+## Part 10  -  Project Deliverables
 
 ### Resume Bullet Points
 
@@ -927,8 +927,8 @@ Time Saved: ~9 days per experiment
 # PART 11: EXPECTED RESULTS
 
 md("""
----
-## Part 11  --  Results Summary
+-
+## Part 11  -  Results Summary
 """)
 
 code("""
@@ -937,7 +937,7 @@ code("""
 # ============================================================
 
 print("=" * 70)
-print("         A/B TEST OUTCOME PREDICTOR  --  FINAL RESULTS SUMMARY")
+print("         A/B TEST OUTCOME PREDICTOR  -  FINAL RESULTS SUMMARY")
 print("=" * 70)
 
 # 1. Model accuracy by checkpoint
@@ -968,7 +968,7 @@ display(summary.pivot_table(index='Model', columns='Day', values='Accuracy').rou
 
 code("""
 # ============================================================
-# 11.2 Final Visualization  --  Complete Results Dashboard
+# 11.2 Final Visualization  -  Complete Results Dashboard
 # ============================================================
 fig, axes = plt.subplots(2, 2, figsize=(18, 14))
 
@@ -1050,7 +1050,7 @@ ax.set_title('Time Savings by Checkpoint', fontweight='bold', fontsize=13)
 ax.set_ylim(0, 16)
 ax.grid(axis='y', alpha=0.3)
 
-plt.suptitle('A/B Test Outcome Predictor  --  Results Dashboard',
+plt.suptitle('A/B Test Outcome Predictor  -  Results Dashboard',
              fontsize=16, fontweight='bold', y=1.01)
 plt.tight_layout()
 plt.savefig('../visuals/results_dashboard.png', dpi=150, bbox_inches='tight')
@@ -1060,11 +1060,11 @@ plt.show()
 md("""
 **Key Findings:**
 
-1. **XGBoost at Day 5 achieves ~80% accuracy**  --  predicting the final outcome 9 days before the traditional approach
-2. **By Day 7, accuracy reaches ~88%**  --  highly reliable for decision support
-3. **Day 1 predictions are unreliable** (~55%)  --  confirming that at least 3 days of data are needed
-4. **The most common error is confusing inconclusive with treatment_wins**  --  small effects are genuinely hard to predict early
-5. **Feature importance shows z-statistic and Bayesian probability are the top predictors**  --  the model leverages statistical evidence strength
+1. **XGBoost at Day 5 achieves ~80% accuracy**  -  predicting the final outcome 9 days before the traditional approach
+2. **By Day 7, accuracy reaches ~88%**  -  highly reliable for decision support
+3. **Day 1 predictions are unreliable** (~55%)  -  confirming that at least 3 days of data are needed
+4. **The most common error is confusing inconclusive with treatment_wins**  -  small effects are genuinely hard to predict early
+5. **Feature importance shows z-statistic and Bayesian probability are the top predictors**  -  the model leverages statistical evidence strength
 
 ### Realistic Expectations
 
@@ -1077,42 +1077,42 @@ These results are based on simulated data with controlled effect sizes. In produ
 # PART 12: PROJECT STRUCTURE
 
 md("""
----
-## Part 12  --  Project Structure & Tech Stack
+-
+## Part 12  -  Project Structure & Tech Stack
 
 ### Repository Structure
 ```
 ab-test-outcome-predictor/
-|-- README.md                              # Project overview and results
-|-- requirements.txt                       # Python dependencies
-|-- .gitignore
-|-- data/
-|   |-- simulated_experiments.csv          # Generated dataset (16,800 rows)
-|   +-- experiment_labels.csv              # Final outcome labels
-|-- notebooks/
-|   +-- AB_Test_Outcome_Predictor.ipynb    # This notebook  --  complete analysis
-|-- src/
-|   |-- __init__.py
-|   |-- simulate_experiments.py            # Experiment simulation engine
-|   |-- statistical_tests.py              # Z-tests and benchmarking
-|   |-- feature_engineering.py            # Feature engineering pipeline
-|   |-- models.py                         # ML model training and evaluation
-|   +-- explainability.py                 # SHAP and feature importance
-|-- visuals/
-|   |-- eda_*.png                         # EDA plots
-|   |-- model_comparison.png              # Model accuracy comparison
-|   |-- confusion_matrices_xgb.png        # Confusion matrices
-|   |-- early_prediction_comparison.png   # ML vs statistics comparison
-|   |-- feature_importance_day5.png       # Feature importance
-|   |-- shap_summary_*.png               # SHAP plots
-|   +-- results_dashboard.png            # Final dashboard
-+-- assets/
-    +-- architecture_diagram.png          # Project workflow diagram
+|- README.md                              # Project overview and results
+|- requirements.txt                       # Python dependencies
+|- .gitignore
+|- data/
+|   |- simulated_experiments.csv          # Generated dataset (16,800 rows)
+|   +- experiment_labels.csv              # Final outcome labels
+|- notebooks/
+|   +- AB_Test_Outcome_Predictor.ipynb    # This notebook  -  complete analysis
+|- src/
+|   |- __init__.py
+|   |- simulate_experiments.py            # Experiment simulation engine
+|   |- statistical_tests.py              # Z-tests and benchmarking
+|   |- feature_engineering.py            # Feature engineering pipeline
+|   |- models.py                         # ML model training and evaluation
+|   +- explainability.py                 # SHAP and feature importance
+|- visuals/
+|   |- eda_*.png                         # EDA plots
+|   |- model_comparison.png              # Model accuracy comparison
+|   |- confusion_matrices_xgb.png        # Confusion matrices
+|   |- early_prediction_comparison.png   # ML vs statistics comparison
+|   |- feature_importance_day5.png       # Feature importance
+|   |- shap_summary_*.png               # SHAP plots
+|   +- results_dashboard.png            # Final dashboard
++- assets/
+    +- architecture_diagram.png          # Project workflow diagram
 ```
 
 ### Tech Stack
 | Tool | Purpose |
-|---|---|
+|-|-|
 | Python 3.9+ | Core language |
 | NumPy, pandas | Data manipulation |
 | SciPy, statsmodels | Statistical testing |
@@ -1124,10 +1124,10 @@ ab-test-outcome-predictor/
 ### Recommended Workflow
 1. Install dependencies: `pip install -r requirements.txt`
 2. Open `notebooks/AB_Test_Outcome_Predictor.ipynb`
-3. Run all cells  --  data simulation, feature engineering, modeling, and analysis are all inline
+3. Run all cells  -  data simulation, feature engineering, modeling, and analysis are all inline
 4. Review visuals in `visuals/` directory
 
----
+-
 
 ## Conclusion
 
@@ -1141,13 +1141,13 @@ This project demonstrates how **machine learning can accelerate A/B testing deci
 
 ### Interview Talking Points
 
-1. **"I built a system that predicts A/B test outcomes 9 days early with 80% accuracy."** This shows you understand both experimentation and ML  --  a rare combination.
+1. **"I built a system that predicts A/B test outcomes 9 days early with 80% accuracy."** This shows you understand both experimentation and ML  -  a rare combination.
 
 2. **"I split the data by experiment_id to prevent data leakage."** This demonstrates you understand the most common pitfall in time-series/grouped prediction problems.
 
-3. **"The model relies on statistical evidence strength (z-statistic, Bayesian probability) rather than raw numbers."** This shows you can interpret ML features in domain context  --  exactly what hiring managers want.
+3. **"The model relies on statistical evidence strength (z-statistic, Bayesian probability) rather than raw numbers."** This shows you can interpret ML features in domain context  -  exactly what hiring managers want.
 
----
+-
 *Created by [Your Name] | [Your Title] | [GitHub](https://github.com/yourusername)*
 """)
 

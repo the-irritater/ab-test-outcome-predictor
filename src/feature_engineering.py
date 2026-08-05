@@ -1,5 +1,5 @@
 """
-Feature Engineering  --  Builds ML features from partial experiment data.
+Feature Engineering  -  Builds ML features from partial experiment data.
 
 Creates conversion features, statistical uncertainty measures,
 Bayesian posterior features, and trend signals for each experiment

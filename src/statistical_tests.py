@@ -1,5 +1,5 @@
 """
-Statistical Tests  --  Traditional A/B testing methods for benchmarking.
+Statistical Tests  -  Traditional A/B testing methods for benchmarking.
 
 Implements two-proportion z-tests, p-value tracking across days,
 and time-to-significance analysis.

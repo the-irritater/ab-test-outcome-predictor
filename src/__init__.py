@@ -1,4 +1,4 @@
-# A/B Test Outcome Predictor  --  Source Package
+# A/B Test Outcome Predictor  -  Source Package
 # Author: Sanman Kadam
 
 from .simulate_experiments import ExperimentSimulator
